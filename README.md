@@ -1,5 +1,7 @@
 # wechat-muse-bridge
 
+English | [简体中文](README.zh-CN.md)
+
 Minimal Tencent ClawBot iLink transport adapter between WeChat and the existing Muse Gadget Side Chat. Inbound: forwards explicitly authorized direct text messages into Muse. Outbound (v0.2.0): pushes Muse replies back to WeChat via `wechat-muse-send`. Muse remains the only agent and decision center. This service does not expose a network listener, interpret intent, or control devices. Licensed under the [MIT License](LICENSE).
 
 ## Flow and limits
