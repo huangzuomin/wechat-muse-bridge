@@ -1,6 +1,12 @@
 import base64
 
-from wechat_muse_bridge.ilink.protocol import common_headers, get_updates_body, inbound_text
+from wechat_muse_bridge.ilink.protocol import (
+    common_headers,
+    get_updates_body,
+    inbound_text,
+    new_client_id,
+    send_message_body,
+)
 
 
 def test_headers_use_documented_auth_and_decimal_client_version():
@@ -37,3 +43,21 @@ def test_extracts_only_direct_text_items():
     assert inbound_text(message) == "hello world"
     assert inbound_text({**message, "group_id": "group-x"}) is None
     assert inbound_text({**message, "message_type": 2}) is None
+
+
+def test_new_client_id_format():
+    cid = new_client_id()
+    assert cid.startswith("hl-")
+    assert len(cid) == 15
+    int(cid[3:], 16)
+
+
+def test_send_message_body_shape():
+    body = send_message_body(to_user_id="u1", context_token="ctx", text="hi")
+    msg = body["msg"]
+    assert msg["to_user_id"] == "u1"
+    assert msg["context_token"] == "ctx"
+    assert msg["message_type"] == 2
+    assert msg["item_list"] == [{"type": 1, "text_item": {"text": "hi"}}]
+    assert msg["client_id"].startswith("hl-")
+    assert body["base_info"]["channel_version"] == "2.4.8"

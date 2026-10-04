@@ -35,3 +35,24 @@ def test_invalid_persisted_session_is_replaced(tmp_path):
     state = BridgeState.load(path)
     assert state.cursor == "x"
     assert re.fullmatch(r"[0-9a-f-]{36}", state.muse_session_id)
+
+
+def test_reply_addressing_roundtrips_and_defaults_empty(tmp_path):
+    path = tmp_path / "state.json"
+    state = BridgeState.load(path)
+    assert state.reply_to_user_id == ""
+    assert state.reply_context_token == ""
+    state.reply_to_user_id = "user-9"
+    state.reply_context_token = "ctx-9"
+    state.save(path)
+    loaded = BridgeState.load(path)
+    assert loaded.reply_to_user_id == "user-9"
+    assert loaded.reply_context_token == "ctx-9"
+
+
+def test_old_state_file_without_reply_fields_still_loads(tmp_path):
+    path = tmp_path / "state.json"
+    path.write_text('{"cursor":"c","muse_session_id":"s"}')
+    state = BridgeState.load(path)
+    assert state.reply_to_user_id == ""
+    assert state.reply_context_token == ""

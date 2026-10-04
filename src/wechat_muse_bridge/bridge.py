@@ -117,6 +117,17 @@ class Bridge:
                      _sender_hash(sender), _safe_id(message_id))
             self._remember(message_id)
             return
+        # Outbound leg addressing: remember the most recent inbound sender and
+        # its context_token so replies can be sent back via sendmessage.
+        # The token is only overwritten when present; a missing field must not
+        # clobber a previously captured one.
+        self.state.reply_to_user_id = sender
+        context_token = message.get("context_token")
+        if isinstance(context_token, str) and context_token:
+            self.state.reply_context_token = context_token
+        else:
+            log.info("event=no_context_token; sender_hash=%s; message_id=%s",
+                     _sender_hash(sender), _safe_id(message_id))
         text = inbound_text(message)
         if text is None:
             log.info("event=ignored_message; sender_hash=%s; message_id=%s",

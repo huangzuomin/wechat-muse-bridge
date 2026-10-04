@@ -1,15 +1,25 @@
 # wechat-muse-bridge
 
-Minimal Tencent ClawBot iLink transport adapter that forwards explicitly authorized direct text messages into the existing Muse Gadget Side Chat. Muse remains the only agent and decision center. This service does not expose a network listener, interpret intent, or control devices. Licensed under the [MIT License](LICENSE).
+Minimal Tencent ClawBot iLink transport adapter between WeChat and the existing Muse Gadget Side Chat. Inbound: forwards explicitly authorized direct text messages into Muse. Outbound (v0.2.0): pushes Muse replies back to WeChat via `wechat-muse-send`. Muse remains the only agent and decision center. This service does not expose a network listener, interpret intent, or control devices. Licensed under the [MIT License](LICENSE).
 
 ## Flow and limits
 
 ```text
-WeChat ClawBot → Tencent iLink long poll → allowlist + text filter
-  → musegadget send-user-msg (stdin) → Muse Side Chat
+Inbound:  WeChat ClawBot → Tencent iLink long poll → allowlist + text filter
+            → musegadget send-user-msg (stdin) → Muse Side Chat
+Outbound: Muse reply → wechat-muse-send (stdin/args) → iLink sendmessage → WeChat
 ```
 
-Supports direct-chat text, one or more explicitly allowlisted `from_user_id` values, `/reset`, persistent iLink cursor, and a single active Muse session. Group chats, other message types, missing sender IDs, and over-limit messages are ignored/rejected without delivery. The bridge does not send Muse responses back to WeChat.
+Supports direct-chat text, one or more explicitly allowlisted `from_user_id` values, `/reset`, persistent iLink cursor, and a single active Muse session. Group chats, other message types, missing sender IDs, and over-limit messages are ignored/rejected without delivery.
+
+Outbound addressing: the inbound loop records the most recent sender's `from_user_id` and `context_token` in the state file on every accepted message, so `wechat-muse-send` needs no manual recipient arguments in the common case:
+
+```bash
+echo "reply text" | /opt/wechat-muse-bridge/venv/bin/wechat-muse-send
+# or: wechat-muse-send --to-user-id ID --context-token TOKEN "reply text"
+```
+
+Long replies are split on paragraph boundaries (4000 chars/chunk). Muse chat widget tokens (`[[hatch_widget:…]]`) are stripped since WeChat cannot render them. The outbound leg requires at least one prior inbound message to capture the recipient; without it the command exits 1.
 
 Delivery is at-least-once oriented. The batch cursor is committed only after the full batch is processed. A Muse failure leaves the cursor uncommitted, so the batch is replayed; a bounded message-id cache and persisted IDs from an uncommitted batch suppress ordinary replay duplicates. Since `musegadget send-user-msg` has no idempotency key, a process crash in the narrow gap after Muse accepted a message and before state is saved can cause a duplicate.
 

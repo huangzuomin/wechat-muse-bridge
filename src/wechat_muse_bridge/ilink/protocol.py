@@ -53,3 +53,23 @@ def inbound_text(message: dict) -> str | None:
             chunks.append(text_item["text"])
     text = "".join(chunks).strip()
     return text or None
+
+
+def new_client_id() -> str:
+    """Client-generated outbound message id, format hl-<12 hex chars>."""
+    return "hl-" + secrets.token_hex(6)
+
+
+def send_message_body(*, to_user_id: str, context_token: str, text: str) -> dict:
+    """Build the POST /ilink/bot/sendmessage JSON body for a text message."""
+    return {
+        "msg": {
+            "to_user_id": to_user_id,
+            "client_id": new_client_id(),
+            "message_type": 2,
+            "message_state": 2,
+            "context_token": context_token,
+            "item_list": [{"type": 1, "text_item": {"text": text}}],
+        },
+        "base_info": base_info(),
+    }
