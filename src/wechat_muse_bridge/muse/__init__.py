@@ -1,0 +1,1 @@
+"""Muse Gadget CLI adapter."""

@@ -1,0 +1,24 @@
+[Unit]
+Description=WeChat Tencent iLink to Muse Gadget bridge
+After=network-online.target musegadget.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=musebridge
+Group=musebridge
+EnvironmentFile=/etc/wechat-muse-bridge/env
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/opt/wechat-muse-bridge/venv/bin/wechat-muse-bridge
+WorkingDirectory=/opt/wechat-muse-bridge
+UMask=0077
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/wechat-muse-bridge
+
+[Install]
+WantedBy=multi-user.target

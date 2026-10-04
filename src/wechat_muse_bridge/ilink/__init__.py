@@ -1,0 +1,1 @@
+"""Tencent iLink protocol adapter."""
