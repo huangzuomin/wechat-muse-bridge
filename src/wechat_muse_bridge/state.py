@@ -15,6 +15,9 @@ class BridgeState:
     muse_session_id: str = ""
     last_message_id: str = ""
     pending_message_ids: list[str] = field(default_factory=list)
+    # Outbound leg: most recent inbound sender, used as the sendmessage target.
+    reply_to_user_id: str = ""
+    reply_context_token: str = ""
 
     @classmethod
     def load(cls, path: Path) -> "BridgeState":
@@ -31,6 +34,8 @@ class BridgeState:
             muse_session_id=_valid_session(_string(raw, "muse_session_id")),
             last_message_id=_string(raw, "last_message_id"),
             pending_message_ids=_string_list(raw, "pending_message_ids"),
+            reply_to_user_id=_string(raw, "reply_to_user_id"),
+            reply_context_token=_string(raw, "reply_context_token"),
         )
 
     def save(self, path: Path) -> None:
@@ -40,6 +45,8 @@ class BridgeState:
             "muse_session_id": self.muse_session_id,
             "last_message_id": self.last_message_id,
             "pending_message_ids": self.pending_message_ids or [],
+            "reply_to_user_id": self.reply_to_user_id,
+            "reply_context_token": self.reply_context_token,
         }
         fd, temp_name = tempfile.mkstemp(prefix=f".{path.name}.", dir=path.parent)
         try:

@@ -21,5 +21,5 @@ tests for new request and response behavior.
 - Keep message bodies, sender IDs, iLink credentials, and personal deployment
   details out of logs, fixtures, commits, and screenshots.
 - Include tests for behavior changes and describe any Pi-specific verification.
-- Do not claim Muse-to-WeChat replies: this bridge currently forwards WeChat
-  messages into Muse only.
+- Outbound replies go through `wechat-muse-send`; keep recipient IDs and
+  context tokens out of logs, fixtures, and commits.

@@ -1,6 +1,6 @@
 [project]
 name = "wechat-muse-bridge"
-version = "0.1.0"
+version = "0.2.0"
 description = "Tencent iLink transport bridge to Muse Gadget"
 readme = "README.md"
 license = "MIT"
@@ -28,6 +28,7 @@ dev = ["pytest>=8.0"]
 
 [project.scripts]
 wechat-muse-bridge = "wechat_muse_bridge.main:main"
+wechat-muse-send = "wechat_muse_bridge.send:main"
 
 [build-system]
 requires = ["hatchling"]
